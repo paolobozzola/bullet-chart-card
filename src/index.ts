@@ -6,7 +6,7 @@ registerCardPicker();
 
 // Friendly console banner — matches the convention of other HACS cards so users
 // can confirm the artifact actually loaded.
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 // eslint-disable-next-line no-console
 console.info(
   `%c BULLET-CHART-CARD %c v${VERSION} `,

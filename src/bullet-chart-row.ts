@@ -50,6 +50,32 @@ export class BulletChartRow extends LitElement {
   private _holdTimer?: ReturnType<typeof setTimeout>;
   private _holdFired = false;
 
+  /**
+   * Lazy-load the editor when the Lovelace dashboard opens the row-edit dialog.
+   * HA picks this up automatically for any custom element with a matching name.
+   */
+  static async getConfigElement(): Promise<HTMLElement> {
+    await import('./bullet-chart-row-editor');
+    return document.createElement('bullet-chart-row-editor');
+  }
+
+  static getStubConfig(hass: HomeAssistant, entities: string[]): Record<string, unknown> {
+    const pickNumeric = (id: string): boolean => {
+      if (!id.startsWith('sensor.') && !id.startsWith('input_number.')) return false;
+      const raw = hass?.states[id]?.state;
+      if (raw === undefined || raw === null) return false;
+      return Number.isFinite(Number(raw));
+    };
+    const first =
+      entities.find(pickNumeric) ?? entities.find((e) => e.startsWith('sensor.')) ?? entities[0];
+    return {
+      type: 'custom:bullet-chart-row',
+      entity: first ?? 'sensor.example',
+      target: 75,
+      show_value: true,
+    };
+  }
+
   setConfig(config: unknown): void {
     try {
       this._config = validateRowConfig(config);

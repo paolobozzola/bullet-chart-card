@@ -1,6 +1,6 @@
 {
   "name": "bullet-chart-card",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Stephen Few-style bullet chart card for Home Assistant, rendered with d3.",
   "type": "module",
   "main": "dist/bullet-chart-card.js",
