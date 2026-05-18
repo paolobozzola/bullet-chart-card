@@ -1,0 +1,52 @@
+{
+  "name": "bullet-chart-card",
+  "version": "0.1.0",
+  "description": "Stephen Few-style bullet chart card for Home Assistant, rendered with d3.",
+  "type": "module",
+  "main": "dist/bullet-chart-card.js",
+  "files": [
+    "dist",
+    "hacs.json",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"{src,test}/**/*.{ts,html,css}\"",
+    "gen-examples": "tsx scripts/gen-examples.ts"
+  },
+  "dependencies": {
+    "custom-card-helpers": "^1.9.0",
+    "d3-axis": "^3.0.0",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-transition": "^3.0.1",
+    "lit": "^3.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1",
+    "@types/d3-axis": "^3.0.6",
+    "@types/d3-scale": "^4.0.8",
+    "@types/d3-selection": "^3.0.10",
+    "@types/d3-transition": "^3.0.8",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.0",
+    "marked": "^12.0.2",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-lit": "^1.11.0",
+    "eslint-plugin-wc": "^2.0.4",
+    "jsdom": "^24.0.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vitest": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

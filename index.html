@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bullet Chart Card — local preview</title>
+    <style>
+      :root {
+        --primary-color: #03a9f4;
+        --primary-text-color: #212121;
+        --secondary-text-color: #5f6368;
+        --card-background-color: #ffffff;
+        --error-color: #db4437;
+        --warning-color: #f4b400;
+        --success-color: #0f9d58;
+        --divider-color: #e0e0e0;
+        --text-primary-color: #ffffff;
+        --secondary-background-color: #f5f5f5;
+      }
+      :root.dark {
+        --primary-text-color: #e8eaed;
+        --secondary-text-color: #9aa0a6;
+        --card-background-color: #1f1f1f;
+        --divider-color: #3c4043;
+        --secondary-background-color: #2d2d2d;
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: var(--secondary-background-color);
+        color: var(--primary-text-color);
+      }
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 64px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      header h1 {
+        font-size: 1.25rem;
+        margin: 0;
+      }
+
+      /* Two columns: card + sliders on the left, YAML editor on the right */
+      .workspace {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 800px) {
+        .workspace { grid-template-columns: 1fr; }
+      }
+
+      .panel {
+        background: var(--card-background-color);
+        border: 1px solid var(--divider-color);
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .panel h2 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--secondary-text-color);
+        margin: 0 0 12px;
+      }
+
+      .controls .row {
+        display: grid;
+        grid-template-columns: 120px 1fr 56px;
+        gap: 12px;
+        align-items: center;
+        padding: 4px 0;
+      }
+      .controls label { font-size: 0.9rem; color: var(--secondary-text-color); }
+      .controls output { font-variant-numeric: tabular-nums; text-align: right; }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .toolbar button {
+        background: var(--primary-color);
+        color: var(--text-primary-color);
+        border: 0;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font: inherit;
+      }
+      .toolbar button.secondary {
+        background: var(--secondary-background-color);
+        color: var(--primary-text-color);
+        border: 1px solid var(--divider-color);
+      }
+
+      .card-host {
+        margin-top: 12px;
+        background: var(--card-background-color);
+        border-radius: 8px;
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.08),
+          0 2px 6px rgba(0, 0, 0, 0.04);
+      }
+
+      .yaml-editor {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .yaml-editor textarea {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.8rem;
+        background: var(--secondary-background-color);
+        color: var(--primary-text-color);
+        border: 1px solid var(--divider-color);
+        border-radius: 6px;
+        padding: 10px 12px;
+        min-height: 360px;
+        flex: 1;
+        resize: vertical;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .yaml-status {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .yaml-status.ok { color: var(--success-color); }
+      .yaml-status.err { color: var(--error-color); white-space: pre-wrap; }
+
+      /* Rendered README section */
+      .readme {
+        background: var(--card-background-color);
+        border: 1px solid var(--divider-color);
+        border-radius: 8px;
+        padding: 8px 24px 24px;
+      }
+      .readme h1, .readme h2, .readme h3 {
+        margin-top: 1.2em;
+      }
+      .readme h1 { font-size: 1.4rem; border-bottom: 1px solid var(--divider-color); padding-bottom: 6px; }
+      .readme h2 { font-size: 1.15rem; border-bottom: 1px solid var(--divider-color); padding-bottom: 4px; }
+      .readme h3 { font-size: 1rem; }
+      .readme p, .readme li { font-size: 0.9rem; line-height: 1.55; }
+      .readme code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: var(--secondary-background-color);
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-size: 0.85em;
+      }
+      .readme pre {
+        background: var(--secondary-background-color);
+        border: 1px solid var(--divider-color);
+        border-radius: 6px;
+        padding: 12px;
+        overflow: auto;
+      }
+      .readme pre code {
+        background: transparent;
+        padding: 0;
+      }
+      .readme table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.85rem;
+        margin: 8px 0;
+      }
+      .readme th, .readme td {
+        border: 1px solid var(--divider-color);
+        padding: 6px 10px;
+        text-align: left;
+      }
+      .readme th {
+        background: var(--secondary-background-color);
+      }
+      .readme a { color: var(--primary-color); }
+      .readme img { max-width: 100%; }
+      .readme blockquote {
+        border-left: 3px solid var(--divider-color);
+        margin: 0;
+        padding-left: 12px;
+        color: var(--secondary-text-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <h1>Bullet Chart Card — preview</h1>
+        <div class="toolbar">
+          <button class="secondary" id="theme">Toggle theme</button>
+          <button class="secondary" id="reset">Reset config</button>
+          <button id="randomize">Randomize values</button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <!-- Left: live card + entity sliders -->
+        <div>
+          <div class="panel controls">
+            <h2>Entity values (live hass)</h2>
+            <div class="row">
+              <label for="energy">Energy (kWh)</label>
+              <input id="energy" type="range" min="0" max="100" step="1" value="62" />
+              <output id="energy-out">62</output>
+            </div>
+            <div class="row">
+              <label for="water">Water (L)</label>
+              <input id="water" type="range" min="0" max="200" step="1" value="135" />
+              <output id="water-out">135</output>
+            </div>
+            <div class="row">
+              <label for="temp">Temperature (°C)</label>
+              <input id="temp" type="range" min="0" max="40" step="0.5" value="21.5" />
+              <output id="temp-out">21.5</output>
+            </div>
+            <div class="row">
+              <label for="energy-target">Energy target</label>
+              <input id="energy-target" type="range" min="0" max="100" step="1" value="80" />
+              <output id="energy-target-out">80</output>
+            </div>
+          </div>
+
+          <div class="card-host" id="card-host"></div>
+        </div>
+
+        <!-- Right: YAML editor -->
+        <div class="panel">
+          <h2>Card configuration (YAML, edit live)</h2>
+          <div class="yaml-editor">
+            <textarea id="yaml-input" spellcheck="false" autocomplete="off"></textarea>
+            <div class="yaml-status ok" id="yaml-status">parsed OK</div>
+          </div>
+        </div>
+      </div>
+
+      <article class="readme" id="readme"></article>
+    </div>
+
+    <script type="module" src="/dev/preview.ts"></script>
+  </body>
+</html>
