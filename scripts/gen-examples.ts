@@ -50,6 +50,9 @@ const { validateConfig } = await import('../src/config/schema');
 const { renderBullets, buildRowsForRender, computeSvgHeight } = await import(
   '../src/render/bullet'
 );
+const { validateRowConfig } = await import('../src/config/row');
+const { renderRow, ROW_RENDER_HEIGHT } = await import('../src/render/row');
+const d3sel = await import('d3-selection');
 
 // ---- 4. Example definitions ---------------------------------------------
 interface State {
@@ -374,6 +377,150 @@ for (const ex of examples) {
   console.log(`✓ ${darkPath}  (${svgEl.outerHTML.length} bytes, dark)`);
 
   document.body.removeChild(svgEl);
+}
+
+// ---- 6. Render an "entity row" example mocking an HA entities card ------
+//
+// The entities card draws each item as a ~50 px tall row stacked vertically,
+// with a 16 px card title at the top and a small horizontal divider between
+// items. We reproduce that chrome here so the docs example looks real.
+{
+  const rowConfigs = [
+    {
+      entity: 'sensor.daily_energy_use',
+      name: 'Energy',
+      icon: 'mdi:flash',
+      subtitle: 'kWh',
+      max: 100,
+      band_palette: 'traffic',
+      bands: [{ to: 33 }, { to: 67 }, { to: 100 }],
+      target: { value: 80, style: 'arrow', position: 'below' },
+      show_value: true,
+    },
+    {
+      entity: 'sensor.daily_water_use',
+      name: 'Water',
+      icon: 'mdi:water',
+      subtitle: 'litres',
+      max: 200,
+      band_palette: 'traffic-reverse',
+      bands: [{ to: 80 }, { to: 150 }, { to: 200 }],
+      target: { value: 150, style: 'arrow', position: 'below' },
+      show_value: true,
+    },
+    {
+      entity: 'sensor.living_room_temp',
+      name: 'Temperature',
+      icon: 'mdi:thermometer',
+      subtitle: '°C',
+      min: 10,
+      max: 30,
+      band_palette: 'cool',
+      bands: [{ to: 18 }, { to: 23 }, { to: 30 }],
+      target: { value: 21, style: 'dot' },
+      show_value: true,
+    },
+  ];
+  const rowState: Record<string, State> = {
+    'sensor.daily_energy_use': { state: '62' },
+    'sensor.daily_water_use': { state: '135' },
+    'sensor.living_room_temp': { state: '22.5' },
+  };
+
+  const cardWidth = 480;
+  const cardPad = 12;
+  const titleH = 28;
+  const rowH = ROW_RENDER_HEIGHT;
+  const rowGap = 4;
+  const totalH = titleH + cardPad + rowConfigs.length * rowH + (rowConfigs.length - 1) * rowGap + cardPad;
+
+  const svgEl = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'svg',
+  ) as unknown as SVGSVGElement;
+  document.body.appendChild(svgEl);
+  svgEl.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svgEl.setAttribute('viewBox', `0 0 ${cardWidth} ${totalH}`);
+  svgEl.setAttribute('width', String(cardWidth));
+  svgEl.setAttribute('height', String(totalH));
+  svgEl.setAttribute(
+    'style',
+    'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;',
+  );
+
+  // Background (light card)
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bg.setAttribute('width', String(cardWidth));
+  bg.setAttribute('height', String(totalH));
+  bg.setAttribute('fill', '#ffffff');
+  bg.setAttribute('rx', '12');
+  svgEl.appendChild(bg);
+
+  // Card title — matches HA entities-card chrome
+  const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  title.setAttribute('x', String(16));
+  title.setAttribute('y', String(20));
+  title.setAttribute('fill', '#212121');
+  title.setAttribute('style', 'font-size: 14px; font-weight: 600;');
+  title.textContent = "Today's KPIs";
+  svgEl.appendChild(title);
+
+  // Each row in its own translated <g>
+  rowConfigs.forEach((rowCfg, i) => {
+    const cfg = validateRowConfig(rowCfg);
+    const resolveNumber = (id: string): number | undefined => {
+      const v = rowState[id]?.state;
+      const n = v !== undefined ? Number(v) : undefined;
+      return n !== undefined && Number.isFinite(n) ? n : undefined;
+    };
+    const rows = buildRowsForRender(
+      cfg,
+      resolveNumber,
+      () => undefined,
+      () => undefined,
+    );
+    const wrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const y = titleH + cardPad + i * (rowH + rowGap);
+    wrapper.setAttribute('transform', `translate(${cardPad}, ${y})`);
+    svgEl.appendChild(wrapper);
+
+    // Inner svg for the row so it has its own coordinate system
+    const innerSvg = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg',
+    ) as unknown as SVGSVGElement;
+    innerSvg.setAttribute('width', String(cardWidth - 2 * cardPad));
+    innerSvg.setAttribute('height', String(rowH));
+    wrapper.appendChild(innerSvg);
+
+    renderRow(d3sel.select(innerSvg), {
+      rows,
+      orientation: 'horizontal',
+      showTicks: cfg.showTicks,
+      width: cardWidth - 2 * cardPad,
+      height: rowH,
+      barHeightRatio: cfg.barHeightRatio,
+      bandOpacity: cfg.bandOpacity,
+      transitionMs: 0,
+      titleSize: cfg.titleSize,
+      subtitleSize: cfg.subtitleSize,
+      titleWeight: cfg.titleWeight,
+      labelAlign: cfg.labelAlign,
+      labelWidth: cfg.labelWidth,
+      columnWidth: cfg.columnWidth,
+      columnGap: cfg.columnGap,
+      cardPadding: 0,
+      tickCount: cfg.tickCount,
+      tickColor: cfg.tickColor,
+      axisSize: cfg.axisSize,
+      fontFamily: cfg.fontFamily,
+      showValue: cfg.showValue,
+      bandStyle: cfg.bandStyle,
+    });
+  });
+
+  fs.writeFileSync(path.join(outDir, 'example-row.svg'), svgEl.outerHTML);
+  console.log(`✓ docs/img/example-row.svg  (${svgEl.outerHTML.length} bytes)`);
 }
 
 console.log('\nDone.');

@@ -1,4 +1,5 @@
 import './bullet-chart-card';
+import './bullet-chart-row';
 import { registerCardPicker } from './ha/register-card';
 
 registerCardPicker();

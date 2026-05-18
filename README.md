@@ -14,6 +14,45 @@ A bullet chart packs more information into a single horizontal row than a gauge:
 
 Stephen Few's original [white paper](https://www.perceptualedge.com/articles/misc/Bullet_Graph_Design_Spec.pdf) makes the case better than this README can.
 
+## Two ways to use it
+
+The artifact registers **two custom elements**:
+
+- **`custom:bullet-chart-card`** — a full-width Lovelace card. Use when the chart is the focus of a dashboard column (single or multi-entity).
+- **`custom:bullet-chart-row`** — an **entity-row** that drops inside any `entities:` card. Use when you want bullets to live alongside other entity-row widgets in a KPI list.
+
+Both share the same renderer and config vocabulary (`bands`, `band_palette`, `target`, …). The row form is a stripped-down adapter — single entity, no axis by default, value rendered on the right, no `<ha-card>` wrapper (the surrounding entities card provides it).
+
+```yaml
+type: entities                         # standard HA entities card
+title: Today's KPIs
+entities:
+  - type: custom:bullet-chart-row
+    entity: sensor.daily_energy_use
+    name: Energy
+    icon: mdi:flash
+    subtitle: kWh
+    max: 100
+    band_palette: traffic
+    bands: [{ to: 33 }, { to: 67 }, { to: 100 }]
+    target: { value: 80, style: arrow, position: below }
+    show_value: true
+
+  - type: custom:bullet-chart-row
+    entity: sensor.daily_water_use
+    name: Water
+    icon: mdi:water
+    band_palette: traffic-reverse
+    max: 200
+    bands: [{ to: 80 }, { to: 150 }, { to: 200 }]
+    target: { value: 150, style: arrow, position: below }
+    show_value: true
+```
+
+![Three bullet-chart-rows inside an HA entities card](docs/img/example-row.svg)
+
+`bullet-chart-row` accepts the same per-row keys (`entity`, `name`, `subtitle`, `icon`, `unit`, `min/max`, `target`, `bands`, `band_palette`, `tap_action`, `hold_action`) plus the visual tweaks that make sense at row scale (`show_value`, `band_style`, `band_opacity`, `bar_height_ratio`, `transition_ms`, `title_size`, `subtitle_size`, `title_weight`, `font_family`). `show_ticks` defaults to **false** for rows.
+
 ## Examples
 
 All five previews below are rendered by the actual card code (via the same code path HA uses) — what you see is what you'd get in your dashboard. Regenerate them with `npm run gen-examples` if you tweak the source.
