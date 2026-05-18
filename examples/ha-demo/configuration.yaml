@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------------------
+# Bullet Chart Card — HA demo helpers
+#
+# Paste this block into your Home Assistant `configuration.yaml` (or include it
+# via `!include packages/bullet_chart_demo.yaml`). It creates four
+# `input_number` sliders + three `template` sensors that mirror those sliders.
+# Together they give the demo dashboard live, interactive values without
+# needing any real sensor on your instance.
+#
+# After saving, in Developer Tools → YAML, click "Check Configuration" then
+# "Restart" (Quick Reload won't recreate template sensors that didn't exist
+# before; full reload is fine).
+# ---------------------------------------------------------------------------
+
+input_number:
+  bullet_demo_energy:
+    name: "Bullet demo • Energy"
+    min: 0
+    max: 100
+    step: 1
+    initial: 62
+    icon: mdi:flash
+  bullet_demo_water:
+    name: "Bullet demo • Water"
+    min: 0
+    max: 200
+    step: 1
+    initial: 135
+    icon: mdi:water
+  bullet_demo_temperature:
+    name: "Bullet demo • Temperature"
+    min: 10
+    max: 30
+    step: 0.5
+    initial: 22.5
+    icon: mdi:thermometer
+  bullet_demo_energy_target:
+    name: "Bullet demo • Energy target"
+    min: 0
+    max: 100
+    step: 1
+    initial: 80
+    icon: mdi:target
+
+template:
+  - sensor:
+      - name: "Bullet demo energy"
+        unique_id: bullet_demo_energy_sensor
+        unit_of_measurement: "kWh"
+        state: "{{ states('input_number.bullet_demo_energy') | float(0) }}"
+      - name: "Bullet demo water"
+        unique_id: bullet_demo_water_sensor
+        unit_of_measurement: "L"
+        state: "{{ states('input_number.bullet_demo_water') | float(0) }}"
+      - name: "Bullet demo temperature"
+        unique_id: bullet_demo_temperature_sensor
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.bullet_demo_temperature') | float(0) }}"

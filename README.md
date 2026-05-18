@@ -183,6 +183,10 @@ entities:
 
 ---
 
+## Try it on your HA instance
+
+`examples/ha-demo/` ships a drop-in demo: four `input_number` sliders + three `template` sensors + a manual dashboard YAML that exercises both `custom:bullet-chart-card` *and* `custom:bullet-chart-row` against the same live data. Drag the sliders — everything reacts instantly. See [`examples/ha-demo/README.md`](examples/ha-demo/README.md) for step-by-step install instructions.
+
 ## Install via HACS
 
 1. In HACS, add this repository as a **Custom Repository** (category: Lovelace).

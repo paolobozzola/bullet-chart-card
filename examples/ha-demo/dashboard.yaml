@@ -1,0 +1,189 @@
+# ---------------------------------------------------------------------------
+# Bullet Chart Card — demo dashboard
+#
+# In your Home Assistant UI:
+#   1. Settings → Dashboards → "+ Add Dashboard" → "New dashboard from scratch"
+#      • title: Bullet Chart Demo
+#      • icon: mdi:chart-bar
+#   2. Open the new dashboard, click ⋮ → Edit dashboard → ⋮ → Raw configuration
+#      editor, and replace the YAML with the content below.
+#   3. Save.
+#
+# Make sure you have:
+#   • Installed `bullet-chart-card.js` as a resource (HACS or `/local/`).
+#   • Pasted the `configuration.yaml` block from this folder and restarted
+#     Home Assistant.
+# ---------------------------------------------------------------------------
+
+title: Bullet Chart Demo
+views:
+  - title: Demo
+    icon: mdi:chart-bar
+    cards:
+
+      # --------------------------------------------------------------------
+      # 1. Live controls — drag the sliders to watch every card react.
+      # --------------------------------------------------------------------
+      - type: entities
+        title: Live controls
+        show_header_toggle: false
+        entities:
+          - entity: input_number.bullet_demo_energy
+          - entity: input_number.bullet_demo_water
+          - entity: input_number.bullet_demo_temperature
+          - entity: input_number.bullet_demo_energy_target
+            secondary_info: last-changed
+
+      # --------------------------------------------------------------------
+      # 2. Whole-card mode — Stephen Few-style multi-KPI dashboard.
+      # --------------------------------------------------------------------
+      - type: custom:bullet-chart-card
+        title: Today's KPIs (card)
+        band_palette: traffic
+        default_bands:
+          - { to: 33 }
+          - { to: 67 }
+          - { to: 100 }
+        entities:
+          - entity: sensor.bullet_demo_energy
+            name: Energy
+            subtitle: kWh, today
+            target:
+              entity: input_number.bullet_demo_energy_target
+              style: arrow
+              position: below
+            tap_action: { action: more-info }
+          - entity: sensor.bullet_demo_water
+            name: Water
+            subtitle: litres, today
+            min: 0
+            max: 200
+            bands:
+              - { to: 80 }
+              - { to: 150 }
+              - { to: 200 }
+            target:
+              value: 150
+              style: arrow
+              position: below
+          - entity: sensor.bullet_demo_temperature
+            name: Temperature
+            subtitle: °C, living room
+            min: 10
+            max: 30
+            band_palette: cool
+            bands:
+              - { to: 18 }
+              - { to: 23 }
+              - { to: 30 }
+            target:
+              value: 21
+              style: dot
+
+      # --------------------------------------------------------------------
+      # 3. Whole-card mode — vertical (small-multiples).
+      # --------------------------------------------------------------------
+      - type: custom:bullet-chart-card
+        title: Today's KPIs (vertical)
+        orientation: vertical
+        band_palette: heat
+        column_width: 48
+        entities:
+          - entity: sensor.bullet_demo_energy
+            name: Energy
+            subtitle: "%"
+            target:
+              entity: input_number.bullet_demo_energy_target
+              style: arrow
+              position: right
+          - entity: sensor.bullet_demo_water
+            name: Water
+            subtitle: L
+            min: 0
+            max: 200
+            target:
+              value: 150
+              style: arrow
+              position: right
+          - entity: sensor.bullet_demo_temperature
+            name: Temp
+            subtitle: °C
+            min: 10
+            max: 30
+            target:
+              value: 21
+              style: arrow
+              position: right
+
+      # --------------------------------------------------------------------
+      # 4. Entity-row mode — bullets inside a standard `entities:` card.
+      # --------------------------------------------------------------------
+      - type: entities
+        title: Today's KPIs (row)
+        show_header_toggle: false
+        entities:
+          - type: custom:bullet-chart-row
+            entity: sensor.bullet_demo_energy
+            name: Energy
+            icon: mdi:flash
+            subtitle: kWh
+            max: 100
+            band_palette: traffic
+            target:
+              entity: input_number.bullet_demo_energy_target
+              style: arrow
+              position: below
+            show_value: true
+            tap_action: { action: more-info }
+
+          - type: custom:bullet-chart-row
+            entity: sensor.bullet_demo_water
+            name: Water
+            icon: mdi:water
+            subtitle: L
+            min: 0
+            max: 200
+            band_palette: traffic-reverse
+            bands:
+              - { to: 80 }
+              - { to: 150 }
+              - { to: 200 }
+            target: { value: 150, style: arrow, position: below }
+            show_value: true
+
+          - type: custom:bullet-chart-row
+            entity: sensor.bullet_demo_temperature
+            name: Temperature
+            icon: mdi:thermometer
+            subtitle: °C
+            min: 10
+            max: 30
+            band_palette: cool
+            bands:
+              - { to: 18 }
+              - { to: 23 }
+              - { to: 30 }
+            target: { value: 21, style: dot }
+            show_value: true
+
+      # --------------------------------------------------------------------
+      # 5. Styling showcase — striped, monochrome, custom targets.
+      # --------------------------------------------------------------------
+      - type: custom:bullet-chart-card
+        title: Styling tweaks
+        band_palette: blues
+        band_style: striped
+        band_opacity: 0.9
+        show_value: true
+        bar_height_ratio: 0.28
+        entities:
+          - entity: sensor.bullet_demo_energy
+            name: Energy
+            subtitle: striped blues + show_value
+            target: { value: 75, style: arrow, position: below, color: "var(--primary-color)" }
+          - entity: sensor.bullet_demo_water
+            name: Water
+            subtitle: striped blues
+            min: 0
+            max: 200
+            target: { value: 150, style: dot, color: "var(--primary-color)" }
