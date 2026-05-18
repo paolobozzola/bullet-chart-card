@@ -16,6 +16,13 @@
 # ---------------------------------------------------------------------------
 
 title: Bullet Chart Demo
+# Declaring the card as a `resources:` of this YAML dashboard guarantees HA
+# loads the JS module *before* rendering. `frontend.extra_module_url` alone
+# can race the dashboard on hard refresh (fresh navigation works because HA's
+# frontend is already initialised).
+resources:
+  - url: /local/community/bullet-chart-card/bullet-chart-card.js
+    type: module
 views:
   - title: Demo
     icon: mdi:chart-bar
